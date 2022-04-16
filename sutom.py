@@ -7,7 +7,7 @@ def wordfinder(N,W,C):
                     wo = W[k][0]
                     if str(wo[j])!=str(C[j][0]):
                         W[k][1] = 0 
-
+    print("Apres les suppressions des 2 : ",W)
     # ON SUPPRIME LES MOTS NE CONTENANT PAS LES LETTRES EXACTES AU BON ENDROIT (on créé une nvlle liste X à partir de W)
     X = []  
     for u in range(len(W)):
@@ -18,7 +18,6 @@ def wordfinder(N,W,C):
     Y = []
     for s in range(len(X)):
         Y.append([X[s][0],X[s][1]])
-
     # ON CREE UNE NOUVELLE LISTE NE CONTENANT PAS LES LETTRES AU BON ENDROIT (on copie X puis on la modif)
     for j in range(len(C)):
         if C[j][1] == "2":
@@ -80,10 +79,10 @@ def wordfinder(N,W,C):
     for u in range(len(X)):
         if int(X[u][1])==1:
             Z.append([X[u][0],1])
-    tri(Z)
+    return tri(N,Z)
 
 
-def Chain(N):
+def Chain(N,W):
     letters = str(input("Votre mot : "))
     occurences = str(input("Les numéros correspondant à la présence des lettres : "))
     letters = letters.upper()
@@ -95,23 +94,14 @@ def Chain(N):
         ask_question()
     for i in range(len(L)):
         C.append([L[i],O[i]])
-    W = []
-    f=open('words.txt','r')
-    for i in range(149443):
-        ligne = f.readline()
-        ligne = ligne.rstrip("\n")
-        ligne = ligne.split(",")
-        if len(ligne[0]) == N:
-            W.append(ligne)
-    f.close()
     wordfinder(N,W,C)
 
-def questions(N):
+def questions(N,W):
     print("Donnez nous désormais les résultats donnés par SUTOM. Indiquez d'abord le mot, puis si les lettres sont présentes dans le mot à trouver")
     print("2 : lettre correctement placée / 1 : lettre présente mais mal placée / 0 : lettre absente. Indiquez les lettres DANS L'ORDRE")
     print("Exemple pour le mot 'Flambi' : Si F et M sont bien placés, que A est mal placé, et que L,B et I sont absents :")
     print("Ecrivez d'abord 'Flambi' puis '201200'")
-    Chain(N)
+    Chain(N,W)
 
 
 def ask_question():
@@ -121,7 +111,16 @@ def ask_question():
         ask_question()
     else:
         print("Les questions vont commencer. Merci de tester une première fois un mot contenant le plus de lettres différentes.")
-        return questions(N)
+        W = []
+        f=open('words.txt','r')
+        for i in range(149443):
+            ligne = f.readline()
+            ligne = ligne.rstrip("\n")
+            ligne = ligne.split(",")
+            if len(ligne[0]) == N:
+                W.append(ligne)
+        f.close()        
+        return questions(N,W)
 
 
         
@@ -130,7 +129,7 @@ def find_word():
     print("=============")
     return ask_question()
 
-def tri(Z):
+def tri(N,Z):
     for u in range(len(Z)):
         wo = Z[u][0]
         lon = len(wo)-1
@@ -169,6 +168,9 @@ def tri(Z):
         if wo[lon] == "S" and wo[lon-1] == "E" and wo[lon-2] == "T" and wo[lon-3] == "I":
             Z[u][1] = 11   
     Z.sort(key=lambda x:x[1],reverse=False)
+    return annonceFin(N,Z)
+
+def annonceFin(N,Z):
     print("\n\n\n\n\n\n\n\n<======================================================================>\n\n\n")
     if len(Z) > 0:
         print("Après un rapide tri, dans l'odre de probabilité, voici les mots possibles :\n\n")
@@ -182,4 +184,20 @@ def tri(Z):
         print("Merci de réessayer. \n\n")
         print("Si le problème persiste, merci de contacter un administrateur.")
     print("\n\n\n<======================================================================>")
+    print("\n\n\n")
+    print("Entrez 0 pour arrêter le processus, 1 pour le continuer, 2 pour le recommencer\n")
+    choicerestart(N,Z)
+    print("\n\n\n")
+
+def resetValues(N,Z):
+    for i in range(0,len(Z)):
+        Z[i][1] = "1"
+    return Chain(N,Z)
+def choicerestart(N,Z): 
+    choix = input("Votre choix : ")
+    if choix == "0": print("Vous avez choisi d'arrêter le programme."); return
+    if choix == "1": print("Vous avez choisi de continuer le programme."); return resetValues(N,Z)
+    if choix == "2": print("Vous avez choisi de recommencers le programme."); return find_word()
+    else: return choicerestart(N,Z)
+
 find_word()
